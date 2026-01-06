@@ -1,8 +1,7 @@
 import 'server-only'
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
-import { redirect } from '@/i18n/routing'
-import { getLocale } from 'next-intl/server'
+import { redirect } from 'next/navigation'
 
 const key = new TextEncoder().encode(process.env.SESSION_SECRET || 'default_secret_please_change_me')
 
@@ -65,9 +64,7 @@ export async function verifySession() {
   const payload = await decrypt(session)
 
   if (!payload?.userId) {
-    const locale = await getLocale()
-    redirect({ href: '/login', locale })
-    throw new Error('Redirecting to login') // Ensure code flow stops
+    redirect('/login')
   }
 
   return { userId: payload.userId as string }

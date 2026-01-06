@@ -11,3 +11,5 @@ export default {
     url: process.env.DIRECT_URL!
   }
 } satisfies PrismaConfig;
+
+// bunx --bun prisma db push
