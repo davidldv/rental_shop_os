@@ -1,0 +1,93 @@
+{
+  "Landing": {
+    "subtitle": "El Sistema Operativo para Negocios de Alquiler",
+    "title": "Gestiona inventario con precisión moderna.",
+    "description": "Deja de usar hojas de cálculo. TallyRent ofrece una suite completa para rastrear activos, evitar reservas dobles y escalar tu negocio audiovisual.",
+    "getStarted": "Empezar",
+    "signIn": "Iniciar Sesión",
+    "nav": {
+      "product": "Producto",
+      "resources": "Recursos",
+      "pricing": "Precios",
+      "docs": "Documentación",
+      "login": "Entrar",
+      "signup": "Registrarse"
+    },
+    "features": {
+      "assetTracking": "Rastreo de Activos",
+      "assetTrackingDesc": "Conoce exactamente dónde está cada lente, cámara y cable en tiempo real.",
+      "conflictDetection": "Detección de Conflictos",
+      "conflictDetectionDesc": "Nuestro motor marca automáticamente las reservas dobles antes de que ocurran.",
+      "financialReporting": "Reportes Financieros",
+      "financialReportingDesc": "Visualiza ingresos, calcula cargos por retraso y gestiona depósitos sin esfuerzo."
+    },
+    "footer": "© 2026 TallyRent. Todos los derechos reservados."
+  },
+  "Auth": {
+    "backToHome": "Volver al Inicio",
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Ingresa tus credenciales para entrar",
+      "submit": "Iniciar Sesión",
+      "submitting": "Iniciando...",
+      "noAccount": "¿No tienes una cuenta?",
+      "signupLink": "Regístrate"
+    },
+    "signup": {
+      "title": "Crear una cuenta",
+      "subtitle": "Ingresa tu email abajo para comenzar",
+      "submit": "Crear cuenta",
+      "submitting": "Creando cuenta...",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "loginLink": "Inicia sesión"
+    },
+    "fields": {
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "name": "Nombre",
+      "placeholders": {
+        "email": "m@ejemplo.com",
+        "name": "Juan Pérez"
+      }
+    },
+    "quote": "TallyRent transformó cómo rastrear nuestro equipo de cámara. Sin más reservas dobles, solo operaciones fluidas.",
+    "quoteAuthor": "Alex V. — Gerente de Estudio",
+    "quoteSignup": "Imprescindible para cualquier negocio de alquiler en crecimiento."
+  },
+  "Dashboard": {
+    "nav": {
+      "dashboard": "/ Panel",
+      "widget": "Widget"
+    },
+    "stripe": {
+      "title": "Acepta Pagos en Línea",
+      "desc": "Conecta tu cuenta de Stripe para comenzar a aceptar pagos con tarjeta de crédito para las reservas.",
+      "button": "Conectar Stripe"
+    },
+    "header": {
+      "bookingsFor": "Reservas para",
+      "filter": "Filtrar",
+      "newBooking": "Nueva Reserva"
+    },
+    "table": {
+      "date": "Fecha y Hora (UTC)",
+      "customer": "Cliente",
+      "equipment": "Equipo",
+      "status": "Estado",
+      "empty": "No se encontraron reservas para este mes.",
+      "to": "hasta"
+    }
+  },
+  "Components": {
+    "LogoutButton": {
+      "label": "Cerrar Sesión"
+    },
+    "AuthVisual": {
+      "bookingConfirmed": "Reserva Confirmada",
+      "justNow": "Justo ahora",
+      "items": "Ítems",
+      "total": "Total",
+      "itemsValue": "3 Cámaras"
+    }
+  }
+}

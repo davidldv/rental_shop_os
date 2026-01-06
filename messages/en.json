@@ -1,0 +1,93 @@
+{
+  "Landing": {
+    "subtitle": "The Operating System for Rental Businesses",
+    "title": "Manage inventory with modern precision.",
+    "description": "Stop using spreadsheets. TallyRent provides a complete suite for tracking assets, preventing double bookings, and scaling your audiovisual business.",
+    "getStarted": "Get Started",
+    "signIn": "Sign In",
+    "nav": {
+      "product": "Product",
+      "resources": "Resources",
+      "pricing": "Pricing",
+      "docs": "Docs",
+      "login": "Login",
+      "signup": "Sign Up"
+    },
+    "features": {
+      "assetTracking": "Asset Tracking",
+      "assetTrackingDesc": "Know exactly where every lens, camera, and cable is in real-time.",
+      "conflictDetection": "Conflict Detection",
+      "conflictDetectionDesc": "Our engine automatically flags double bookings before they happen.",
+      "financialReporting": "Financial Reporting",
+      "financialReportingDesc": "Visualize revenue, calculate late fees, and manage deposits effortlessly."
+    },
+    "footer": "© 2026 TallyRent. All rights reserved."
+  },
+  "Auth": {
+    "backToHome": "Back to Home",
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Enter your credentials to login",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create an account",
+      "subtitle": "Enter your email below to get started",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "name": "Name",
+      "placeholders": {
+        "email": "m@example.com",
+        "name": "John Doe"
+      }
+    },
+    "quote": "TallyRent transformed how we track our camera gear. No more double bookings, just smooth operations.",
+    "quoteAuthor": "Alex V. — Studio Manager",
+    "quoteSignup": "A must-have for any rental business scaling up."
+  },
+  "Dashboard": {
+    "nav": {
+      "dashboard": "/ Dashboard",
+      "widget": "Widget"
+    },
+    "stripe": {
+      "title": "Accept Payments Online",
+      "desc": "Connect your Stripe account to start accepting credit card payments for bookings.",
+      "button": "Connect Stripe"
+    },
+    "header": {
+      "bookingsFor": "Bookings for",
+      "filter": "Filter",
+      "newBooking": "New Booking"
+    },
+    "table": {
+      "date": "Date & Time (UTC)",
+      "customer": "Customer",
+      "equipment": "Equipment",
+      "status": "Status",
+      "empty": "No bookings found for this month.",
+      "to": "to"
+    }
+  },
+  "Components": {
+    "LogoutButton": {
+      "label": "Logout"
+    },
+    "AuthVisual": {
+      "bookingConfirmed": "Booking Confirmed",
+      "justNow": "Just now",
+      "items": "Items",
+      "total": "Total",
+      "itemsValue": "3 Cameras"
+    }
+  }
+}

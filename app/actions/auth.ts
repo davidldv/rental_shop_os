@@ -18,11 +18,15 @@ const loginSchema = z.object({
 })
 
 export async function signup(prevState: any, formData: FormData) {
-  const result = signupSchema.safeParse(Object.fromEntries(formData))
+  const data = Object.fromEntries(formData)
+  const result = signupSchema.safeParse(data)
+  // Mask password in inputs returned
+  const inputs = { ...data, password: '' } as Record<string, any>
 
   if (!result.success) {
     return {
       errors: result.error.flatten().fieldErrors,
+      inputs,
     }
   }
 
@@ -37,6 +41,7 @@ export async function signup(prevState: any, formData: FormData) {
       errors: {
         email: ['User with this email already exists'],
       },
+      inputs,
     }
   }
 
@@ -57,11 +62,15 @@ export async function signup(prevState: any, formData: FormData) {
 }
 
 export async function login(prevState: any, formData: FormData) {
-  const result = loginSchema.safeParse(Object.fromEntries(formData))
+  const data = Object.fromEntries(formData)
+  const result = loginSchema.safeParse(data)
+  // Mask password in inputs returned
+  const inputs = { ...data, password: '' } as Record<string, any>
 
   if (!result.success) {
     return {
       errors: result.error.flatten().fieldErrors,
+      inputs,
     }
   }
 
@@ -74,6 +83,7 @@ export async function login(prevState: any, formData: FormData) {
   if (!user || !user.password) {
     return {
       message: 'Invalid email or password',
+      inputs,
     }
   }
 
@@ -82,6 +92,7 @@ export async function login(prevState: any, formData: FormData) {
   if (!passwordMatch) {
     return {
       message: 'Invalid email or password',
+      inputs,
     }
   }
 

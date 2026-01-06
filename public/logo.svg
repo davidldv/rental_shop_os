@@ -1,0 +1,13 @@
+<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon: A stylized tally chart / clipboard representation -->
+  <rect x="5" y="5" width="40" height="40" rx="8" stroke="white" stroke-width="3"/>
+  <path d="M15 18H35" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <path d="M15 28H35" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <path d="M15 38H25" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- "Check" accent to signify 'Tally' -->
+  <path d="M28 34L32 38L38 30" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Text: TallyRent -->
+  <text x="55" y="35" fill="white" font-family="system-ui, -apple-system, sans-serif" font-weight="bold" font-size="28" letter-spacing="-0.5">TallyRent</text>
+</svg>

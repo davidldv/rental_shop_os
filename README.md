@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TallyRent
+
+The Operating System for Rental Businesses. A vertical SaaS designed to help small audiovisual equipment rental businesses track availability, prevent double bookings, and accept payments online.
+
+## Core Features
+
+- **Real-time Availability**: Automatically tracks inventory counts across date ranges to prevent double bookings.
+- **Online Bookings**: Customers can browse inventory, select dates, and book equipment instantly.
+- **Stripe Integration**: Automated deposits and payments via Stripe Connect.
+- **Inventory Management**: CRUD operations for products with quantity tracking.
+- **Dashboard**: A monthly calendar view for owners to manage bookings and status.
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Payments**: Stripe & Stripe Connect (Express)
+- **Styling**: Tailwind CSS
+- **Validation**: Zod
+- **Internationalization**: next-intl
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js & npm/bun
+- PostgreSQL database
+- Stripe Account
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/davidldv/TallyRent.git
+   cd TallyRent
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+   ```bash
+   bun install
+   # or npm install
+   ```
 
-## Learn More
+3. Set up environment variables:
+   Copy the `.env.example` to `.env` and fill in your details:
+   ```bash
+   DATABASE_URL="postgresql://..."
+   STRIPE_SECRET_KEY="sk_test_..."
+   STRIPE_PUBLISHABLE_KEY="pk_test_..."
+   STRIPE_CONNECT_CLIENT_ID="ca_..."
+   NEXT_PUBLIC_APP_URL="http://localhost:3000"
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. Initialize the database:
+   ```bash
+   bun prisma migrate dev
+   # or npx prisma migrate dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Run the development server:
+   ```bash
+   bun dev
+   # or npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architecture
 
-## Deploy on Vercel
+### Data Models
+- **User**: Authentication and account management.
+- **Business**: Profile linked to the user (One business per owner).
+- **Product**: Rental items with quantity, price, and deposit settings.
+- **Booking**: Date-range reservations with status tracking (PENDING, CONFIRMED, CANCELLED).
+- **Payment**: Stripe payment records linked to bookings.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Availability Logic
+The system uses a date-range checking algorithm to ensure product units are never overbooked. It calculates `(Total Quantity) - (Active Bookings in Range)` to determine availability.

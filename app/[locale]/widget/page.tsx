@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { DatePicker } from "@/components/ui/date-picker";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type Product = {
   id: string;
@@ -143,7 +145,11 @@ export default function WidgetPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-background text-foreground">
+    <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-background text-foreground relative">
+      <Link href="/dashboard" className="absolute top-6 left-6 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+        <ArrowLeft className="w-5 h-5" />
+        Back to Dashboard
+      </Link>
       <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
         <h2 className="mb-6 text-xl font-semibold tracking-tight">Book Equipment</h2>
 

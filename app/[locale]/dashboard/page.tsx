@@ -3,6 +3,7 @@ import { verifySession } from "@/lib/session";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connectStripe } from "@/app/actions/stripe";
+import { getTranslations } from "next-intl/server";
 
 function formatDateTimeUtc(d: Date) {
   return new Date(d).toLocaleDateString("en-US", { 
@@ -12,6 +13,8 @@ function formatDateTimeUtc(d: Date) {
 
 export default async function DashboardPage() {
   const session = await verifySession();
+  const t = await getTranslations('Dashboard');
+  
   const now = new Date();
   const year = now.getUTCFullYear();
   const monthIndex = now.getUTCMonth();
@@ -60,13 +63,13 @@ export default async function DashboardPage() {
                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                    </div>
                    <div>
-                     <h3 className="text-sm font-semibold text-foreground">Accept Payments Online</h3>
-                     <p className="text-sm text-muted-foreground">Connect your Stripe account to start accepting credit card payments for bookings.</p>
+                     <h3 className="text-sm font-semibold text-foreground">{t('stripe.title')}</h3>
+                     <p className="text-sm text-muted-foreground">{t('stripe.desc')}</p>
                    </div>
                 </div>
                 <form action={connectStripe}>
                   <button type="submit" className="h-9 rounded-md bg-yellow-500 px-4 text-sm font-medium text-black hover:bg-yellow-400 cursor-pointer">
-                    Connect Stripe
+                    {t('stripe.button')}
                   </button>
                 </form>
              </div>
@@ -77,18 +80,18 @@ export default async function DashboardPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{business.name}</h1>
             <p className="mt-2 text-muted-foreground">
-              Bookings for <span className="text-foreground font-medium">{start.toLocaleString('default', { month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
+              {t('header.bookingsFor')} <span className="text-foreground font-medium">{start.toLocaleString('default', { month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
             </p>
           </div>
           <div className="flex gap-2">
             <button className="h-9 rounded-md bg-secondary px-4 text-sm font-medium text-secondary-foreground hover:bg-secondary/80">
-                Filter
+                {t('header.filter')}
             </button>
             <Link 
               href="/dashboard/new"
               className="inline-flex items-center justify-center h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
-                New Booking
+                {t('header.newBooking')}
             </Link>
           </div>
         </div>
@@ -97,17 +100,17 @@ export default async function DashboardPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/50 text-muted-foreground">
               <tr>
-                <th className="px-6 py-4 font-medium">Date & Time (UTC)</th>
-                <th className="px-6 py-4 font-medium">Customer</th>
-                <th className="px-6 py-4 font-medium">Equipment</th>
-                <th className="px-6 py-4 font-medium text-right">Status</th>
+                <th className="px-6 py-4 font-medium">{t('table.date')}</th>
+                <th className="px-6 py-4 font-medium">{t('table.customer')}</th>
+                <th className="px-6 py-4 font-medium">{t('table.equipment')}</th>
+                <th className="px-6 py-4 font-medium text-right">{t('table.status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {bookings.length === 0 ? (
                 <tr>
                   <td className="px-6 py-12 text-center text-muted-foreground" colSpan={4}>
-                    No bookings found for this month.
+                    {t('table.empty')}
                   </td>
                 </tr>
               ) : (
@@ -118,7 +121,7 @@ export default async function DashboardPage() {
                   >
                      <td className="px-6 py-4 align-top whitespace-nowrap">
                       <div className="font-medium">{formatDateTimeUtc(b.startAt)}</div>
-                      <div className="text-xs text-muted-foreground">to {formatDateTimeUtc(b.endAt)}</div>
+                      <div className="text-xs text-muted-foreground">{t('table.to')} {formatDateTimeUtc(b.endAt)}</div>
                     </td>
                     <td className="px-6 py-4 align-top">
                         <div className="font-medium">{b.customer.name}</div>

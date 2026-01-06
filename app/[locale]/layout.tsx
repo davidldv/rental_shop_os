@@ -1,6 +1,9 @@
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
+import { ToastProvider } from "@/components/ui/simple-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,17 +20,26 @@ export const metadata: Metadata = {
   description: "Manage your rental business with modern precision using TallyRent. Track inventory, prevent double bookings, and scale your audiovisual business effortlessly.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }>) {
+  const { locale } = await params;
+  const messages = await getMessages();
+
   return (
-    <html lang="en" className="dark">
+    <html lang={locale} className="dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          <ToastProvider>
+             {children}
+          </ToastProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
