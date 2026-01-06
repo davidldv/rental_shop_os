@@ -19,9 +19,22 @@ export async function GET(request: Request) {
   const cookieStore = await cookies();
   const storedState = cookieStore.get("google_oauth_state")?.value ?? null;
   const storedCodeVerifier = cookieStore.get("google_oauth_code_verifier")?.value ?? null;
-  
+
   if (!code || !state || !storedState || !storedCodeVerifier || state !== storedState) {
-    return new Response(null, {
+    console.error('OAuth Callback Error:', {
+      hasCode: !!code,
+      hasState: !!state,
+      hasStoredState: !!storedState,
+      hasStoredVerifier: !!storedCodeVerifier,
+      statesMatch: state === storedState
+    });
+    
+    return new Response(`OAuth Error: Invalid State. 
+      Code: ${!!code}, 
+      State: ${!!state}, 
+      StoredState: ${!!storedState}, 
+      StoredVerifier: ${!!storedCodeVerifier},
+      Match: ${state === storedState}`, {
       status: 400
     });
   }
