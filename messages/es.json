@@ -24,6 +24,7 @@
     "footer": "© 2026 TallyRent. Todos los derechos reservados."
   },
   "Auth": {
+    "google": "Continuar con Google",
     "backToHome": "Volver al Inicio",
     "login": {
       "title": "Bienvenido de nuevo",
