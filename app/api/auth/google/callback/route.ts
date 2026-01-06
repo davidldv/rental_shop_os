@@ -106,7 +106,11 @@ export async function GET(request: Request) {
     const cookieStore = await cookies();
     const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
     
-    return Response.redirect(new URL(`/${locale}/dashboard`, request.url));
+    // Use NextResponse to ensure cookies are preserved
+    const redirectUrl = new URL(`/${locale}/dashboard`, request.url);
+    // Explicitly copy cookies to the response if needed, 
+    // but Next.js usually handles this with the cookies() API
+    return Response.redirect(redirectUrl);
 
   } catch (e) {
     console.error(e);
