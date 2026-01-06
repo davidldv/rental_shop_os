@@ -1,56 +1,86 @@
 import { prisma } from "../lib/db";
+import { hash } from "bcryptjs";
 
 async function main() {
-  const shop = await prisma.shop.upsert({
-    where: { id: "demo-shop" },
-    update: {},
+  console.log("Seeding database...");
+
+  const passwordHash = await hash("password123", 10);
+
+  // Create a default user
+  const user = await prisma.user.upsert({
+    where: { email: "demo@rental.os" },
+    update: {
+      password: passwordHash
+    },
     create: {
-      id: "demo-shop",
-      name: "Demo Rental Shop",
-      timezone: "UTC",
+      email: "demo@rental.os",
+      name: "Demo Owner",
+      password: passwordHash, 
     },
   });
 
-  const customer = await prisma.customer.upsert({
-    where: { id: "demo-customer" },
+  console.log("Created user:", user.email);
+
+  // Create a business for the user
+  const business = await prisma.business.upsert({
+    where: { userId: user.id },
     update: {},
     create: {
-      id: "demo-customer",
-      shopId: shop.id,
+      userId: user.id,
+      name: "Demo Rental Business",
+      country: "US",
+      currency: "USD",
+    },
+  });
+
+  console.log("Created business:", business.name);
+
+  // Create a customer
+  await prisma.customer.create({
+    data: {
+      businessId: business.id,
       name: "Walk-in Customer",
+      email: "walkin@example.com",
     },
   });
 
-  await prisma.item.upsert({
-    where: { id: "demo-item-camera" },
-    update: {},
-    create: {
-      id: "demo-item-camera",
-      shopId: shop.id,
+  // Create products
+  const camera = await prisma.product.create({
+    data: {
+      businessId: business.id,
       name: "Sony A7SIII",
-      sku: "SONY-A7SIII",
-      quantity: 2,
-      dailyRateCents: 15000,
-      depositCents: 50000,
+      description: "Professional Mirrorless Camera",
+      pricePerDay: 15000,
+      lateFeePerDay: 20000,
+      assets: {
+        create: [
+            { identifier: "A7SIII-001", status: "AVAILABLE" },
+            { identifier: "A7SIII-002", status: "AVAILABLE" },
+        ]
+      }
     },
   });
 
-  await prisma.item.upsert({
-    where: { id: "demo-item-tripod" },
-    update: {},
-    create: {
-      id: "demo-item-tripod",
-      shopId: shop.id,
+  await prisma.product.create({
+    data: {
+      businessId: business.id,
       name: "Heavy-Duty Tripod",
-      sku: "TRIPOD-HD",
-      quantity: 5,
-      dailyRateCents: 2500,
-      depositCents: 5000,
+      description: "Stable tripod for video",
+      pricePerDay: 2500,
+      lateFeePerDay: 1000,
+      assets: {
+        create: [
+            { identifier: "TRIPOD-001", status: "AVAILABLE" },
+            { identifier: "TRIPOD-002", status: "AVAILABLE" },
+            { identifier: "TRIPOD-003", status: "AVAILABLE" },
+            { identifier: "TRIPOD-004", status: "AVAILABLE" },
+            { identifier: "TRIPOD-005", status: "AVAILABLE" },
+        ]
+      }
     },
   });
-
-  // Keep lint happy about unused variable in case you change seed behavior later.
-  void customer;
+  
+  console.log("Seeding completed.");
 }
 
 main()

@@ -4,9 +4,10 @@ export default {
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
-    seed: 'tsx prisma/seed.ts',
+    seed: 'bun prisma/seed.ts',
   },
   datasource: { 
-    url: process.env.DATABASE_URL ?? "file:./dev.db"
+    // Uses the Direct URL (Session mode) for migrations and CLI operations
+    url: process.env.DIRECT_URL!
   }
 } satisfies PrismaConfig;

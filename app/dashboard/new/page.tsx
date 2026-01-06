@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from 'next/link';
 import { DatePicker } from "@/components/ui/date-picker";
 
 type Product = {
@@ -29,7 +30,7 @@ function toIsoUtc(value: Date | undefined) {
   return value.toISOString();
 }
 
-export default function WidgetPage() {
+export default function NewBookingPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -143,10 +144,18 @@ export default function WidgetPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-background text-foreground">
-      <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
-        <h2 className="mb-6 text-xl font-semibold tracking-tight">Book Equipment</h2>
+      <div className="w-full max-w-lg mx-auto">
+        <div className="mb-8 flex items-center justify-between">
+           <div>
+               <h1 className="text-3xl font-bold tracking-tight">New Booking</h1>
+               <p className="text-muted-foreground mt-1">Create a new reservation manually.</p>
+           </div>
+           <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+             &larr; Back
+           </Link>
+        </div>
 
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="space-y-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Product</label>
@@ -198,7 +207,7 @@ export default function WidgetPage() {
           </div>
 
           <div>
-             <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Your Name (Optional)</label>
+             <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Customer Name</label>
              <input
                type="text"
                className="w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
@@ -221,7 +230,7 @@ export default function WidgetPage() {
                disabled={checking || loading || bookingStatus === "submitting"}
                className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
             >
-               {bookingStatus === "submitting" ? "Booking..." : "Book Now"}
+               {bookingStatus === "submitting" ? "Creating..." : "Create Booking"}
             </button>
           </div>
 
@@ -250,7 +259,7 @@ export default function WidgetPage() {
 
           {bookingStatus === "success" && (
             <div className="mt-4 rounded-md border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-500">
-               Booking confirmed!
+               Booking created successfully!
             </div>
           )}
 

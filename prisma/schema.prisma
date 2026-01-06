@@ -3,7 +3,161 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String?
+  name      String?
+  
+  business  Business?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Business {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  name      String
+  country   String   @default("US")
+  currency  String   @default("USD")
+  
+  stripeConnectAccountId    String?
+  stripeOnboardingComplete  Boolean  @default(false)
+  
+  products  Product[]
+  customers Customer[]
+  bookings  Booking[]
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum AssetStatus {
+  AVAILABLE
+  MAINTENANCE
+  LOST
+  RETIRED
+}
+
+model BookingItem {
+  id        String @id @default(cuid())
+  bookingId String
+  
+  // You need BOTH. 
+  // ProductId tells you WHAT they paid for.
+  // AssetId tells you WHICH physical item they took.
+  productId String
+  assetId   String?  // Optional at first, assigned when they pick up the gear
+  
+  pricePerDaySnapshot   Int?
+
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  asset     Asset?  @relation(fields: [assetId], references: [id]) 
+
+  @@index([bookingId])
+  @@index([productId])
+}
+
+model Asset {
+  id             String  @id @default(cuid())
+  productId      String
+  
+  // "Lens #4" or "Serial 998877"
+  identifier     String  
+  status         AssetStatus @default(AVAILABLE)
+  
+  product        Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  // The history of this specific item being rented
+  bookingItems   BookingItem[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@unique([productId, identifier]) // Prevent duplicate serials for same product
+}
+
+model Product {
+  id             String  @id @default(cuid())
+  businessId     String
+  name           String
+  description    String?
+  // pricing stays here
+  pricePerDay    Int     
+  lateFeePerDay  Int     
+  
+  // Track specific items (e.g. Serial numbers)
+  assets         Asset[] 
+  bookingItems   BookingItem[]
+  
+  business       Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  businessId String
+  name       String
+  email      String?
+  phone      String?
+  
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  bookings   Booking[]
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model Booking {
+  id         String        @id @default(cuid())
+  businessId String
+  customerId String
+  startAt    DateTime
+  endAt      DateTime
+  status     BookingStatus @default(PENDING)
+  notes      String?
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items      BookingItem[]
+  payments   Payment[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([businessId, startAt, endAt])
+  @@index([customerId])
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  bookingId             String
+  kind                  PaymentKind
+  amountCents           Int
+  currency              String        @default("usd")
+  status                PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
+  stripePaymentIntentId String?
+
+  booking               Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([bookingId])
+  @@index([stripePaymentIntentId])
 }
 
 enum BookingStatus {
@@ -25,109 +179,4 @@ enum PaymentStatus {
   PROCESSING
   SUCCEEDED
   CANCELED
-}
-
-model Shop {
-  id                        String   @id @default(cuid())
-  name                      String
-  timezone                  String   @default("UTC")
-  stripeConnectAccountId    String?
-  stripeOnboardingComplete  Boolean  @default(false)
-
-  items     Item[]
-  customers Customer[]
-  bookings  Booking[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Item {
-  id            String  @id @default(cuid())
-  shopId        String
-  name          String
-  sku           String?
-  quantity      Int     @default(1)
-  dailyRateCents Int    @default(0)
-  depositCents  Int     @default(0)
-  active        Boolean @default(true)
-
-  shop         Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  bookingItems BookingItem[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([shopId])
-}
-
-model Customer {
-  id      String  @id @default(cuid())
-  shopId  String
-  name    String
-  email   String?
-  phone   String?
-
-  shop     Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  bookings Booking[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([shopId])
-}
-
-model Booking {
-  id         String        @id @default(cuid())
-  shopId     String
-  customerId String
-  startAt    DateTime
-  endAt      DateTime
-  status     BookingStatus @default(PENDING)
-  notes      String?
-
-  shop     Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  customer Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  items    BookingItem[]
-  payments Payment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([shopId, startAt, endAt])
-  @@index([customerId])
-}
-
-model BookingItem {
-  id        String @id @default(cuid())
-  bookingId String
-  itemId    String
-  quantity  Int    @default(1)
-
-  dailyRateCentsSnapshot Int?
-  depositCentsSnapshot   Int?
-
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  item    Item    @relation(fields: [itemId], references: [id], onDelete: Restrict)
-
-  @@index([bookingId])
-  @@index([itemId])
-}
-
-model Payment {
-  id                 String        @id @default(cuid())
-  bookingId          String
-  kind               PaymentKind
-  amountCents        Int
-  currency           String        @default("usd")
-  status             PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
-  stripePaymentIntentId String?
-
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([bookingId])
-  @@index([stripePaymentIntentId])
 }

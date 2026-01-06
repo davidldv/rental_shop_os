@@ -1,8 +1,8 @@
 import { prisma } from "./db";
 
 export type AvailabilityRequest = {
-  shopId: string;
-  itemId: string;
+  businessId: string;
+  productId: string;
   startAt: Date;
   endAt: Date;
   quantity: number;
@@ -20,31 +20,35 @@ export function rangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date
   return aStart < bEnd && bStart < aEnd;
 }
 
-export async function getRemainingQuantityForItem(input: AvailabilityRequest, db: DbClient = prisma) {
-  const item = await db.item.findFirst({
-    where: { id: input.itemId, shopId: input.shopId, active: true },
-    select: { quantity: true },
+export async function getRemainingQuantityForProduct(input: AvailabilityRequest, db: DbClient = prisma) {
+  const product = await db.product.findFirst({
+    where: { id: input.productId, businessId: input.businessId },
+    select: { 
+      _count: {
+        select: { assets: { where: { status: "AVAILABLE" } } }
+      }
+    },
   });
 
-  if (!item) return { exists: false as const, remaining: 0, total: 0 };
+  if (!product) return { exists: false as const, remaining: 0, total: 0 };
+  
+  const totalQuantity = product._count.assets;
 
-  const overlapping = await db.bookingItem.aggregate({
+  const reservedCount = await db.bookingItem.count({
     where: {
-      itemId: input.itemId,
+      productId: input.productId,
       booking: {
-        shopId: input.shopId,
+        businessId: input.businessId,
         status: { in: ["PENDING", "CONFIRMED"] },
         startAt: { lt: input.endAt },
         endAt: { gt: input.startAt },
       },
     },
-    _sum: { quantity: true },
   });
 
-  const reserved = overlapping._sum.quantity ?? 0;
-  const remaining = Math.max(0, item.quantity - reserved);
+  const remaining = Math.max(0, totalQuantity - reservedCount);
 
-  return { exists: true as const, remaining, total: item.quantity };
+  return { exists: true as const, remaining, total: totalQuantity };
 }
 
 export async function assertAvailableOrThrow(input: AvailabilityRequest, db: DbClient = prisma) {
@@ -55,10 +59,10 @@ export async function assertAvailableOrThrow(input: AvailabilityRequest, db: DbC
     throw new Error("Invalid quantity");
   }
 
-  const { exists, remaining } = await getRemainingQuantityForItem(input, db);
+  const { exists, remaining } = await getRemainingQuantityForProduct(input, db);
 
   if (!exists) {
-    throw new Error("Item not found");
+    throw new Error("Product not found");
   }
 
   if (remaining < input.quantity) {

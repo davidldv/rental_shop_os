@@ -3,13 +3,12 @@ import { z } from "zod";
 
 import { assertAvailableOrThrow, isValidRange } from "@/lib/availability";
 import { prisma } from "@/lib/db";
-
-const DEMO_SHOP_ID = "demo-shop";
+import { verifySession } from "@/lib/session";
 
 type TxClient = Parameters<typeof prisma.$transaction>[0] extends (tx: infer T) => unknown ? T : never;
 
 const CreateBookingSchema = z.object({
-  itemId: z.string().min(1),
+  productId: z.string().min(1),
   startAt: z.string().datetime(),
   endAt: z.string().datetime(),
   quantity: z.number().int().positive().default(1),
@@ -33,81 +32,63 @@ export async function POST(req: Request) {
   }
 
   try {
+    const session = await verifySession();
+    
     const booking = await prisma.$transaction(async (tx: TxClient) => {
-      const item = await tx.item.findFirst({
-        where: { id: parsed.itemId, shopId: DEMO_SHOP_ID, active: true },
-        select: { id: true, dailyRateCents: true, depositCents: true },
+      const business = await tx.business.findUnique({ where: { userId: session.userId } });
+      if (!business) throw new Error("Business not found");
+
+      const product = await tx.product.findFirst({
+        where: { id: parsed.productId, businessId: business.id },
+        select: { id: true, pricePerDay: true },
       });
 
-      if (!item) {
-        throw new Error("Item not found");
+      if (!product) {
+        throw new Error("Product not found");
       }
 
       await assertAvailableOrThrow(
         {
-          shopId: DEMO_SHOP_ID,
-          itemId: parsed.itemId,
+          businessId: business.id,
+          productId: parsed.productId,
           startAt,
           endAt,
           quantity: parsed.quantity,
         },
-        tx,
+        tx
       );
 
-      const customer = parsed.customerName
-        ? await tx.customer.create({
-            data: {
-              shopId: DEMO_SHOP_ID,
-              name: parsed.customerName,
-            },
-            select: { id: true, name: true },
-          })
-        : await tx.customer.findFirst({
-            where: { id: "demo-customer", shopId: DEMO_SHOP_ID },
-            select: { id: true, name: true },
-          });
-
-      if (!customer) {
-        throw new Error("Customer missing");
-      }
-
-      return tx.booking.create({
+      // Simple customer creation for MVP (since no auth for customers yet)
+      const customer = await tx.customer.create({
         data: {
-          shopId: DEMO_SHOP_ID,
+            businessId: business.id,
+            name: parsed.customerName || "Guest Customer",
+        },
+      });
+      
+      const newBooking = await tx.booking.create({
+        data: {
+          businessId: business.id,
           customerId: customer.id,
           startAt,
           endAt,
           status: "PENDING",
+          notes: "Online booking",
           items: {
-            create: {
-              itemId: item.id,
-              quantity: parsed.quantity,
-              dailyRateCentsSnapshot: item.dailyRateCents,
-              depositCentsSnapshot: item.depositCents,
-            },
-          },
-        },
-        select: {
-          id: true,
-          startAt: true,
-          endAt: true,
-          status: true,
-          customer: { select: { id: true, name: true } },
-          items: {
-            select: {
-              id: true,
-              quantity: true,
-              item: { select: { id: true, name: true } },
-            },
+            create: Array.from({ length: parsed.quantity }).map(() => ({
+              productId: product.id,
+              pricePerDaySnapshot: product.pricePerDay,
+            })),
           },
         },
       });
+      
+      return newBooking;
     });
 
-    return NextResponse.json({ booking });
+    return NextResponse.json(booking);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Unknown error";
-    const status = message === "Not available" ? 409 : 400;
-    return NextResponse.json({ error: message }, { status });
+    console.error(e);
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-
 import { prisma } from "@/lib/db";
-
-const DEMO_SHOP_ID = "demo-shop";
+import { verifySession } from "@/lib/session";
 
 function parseMonth(month: string | null) {
   if (!month) return null;
@@ -26,9 +24,16 @@ export async function GET(req: Request) {
   const start = new Date(Date.UTC(year, monthIndex, 1, 0, 0, 0));
   const end = new Date(Date.UTC(year, monthIndex + 1, 1, 0, 0, 0));
 
+  const session = await verifySession();
+  const business = await prisma.business.findUnique({ where: { userId: session.userId } });
+  
+  if (!business) {
+    return NextResponse.json({ error: "Business not found" }, { status: 404 });
+  }
+
   const bookings = await prisma.booking.findMany({
     where: {
-      shopId: DEMO_SHOP_ID,
+      businessId: business.id,
       status: { in: ["PENDING", "CONFIRMED", "COMPLETED"] },
       startAt: { lt: end },
       endAt: { gt: start },
@@ -42,12 +47,11 @@ export async function GET(req: Request) {
       customer: { select: { name: true } },
       items: {
         select: {
-          quantity: true,
-          item: { select: { name: true } },
+          product: { select: { name: true } },
         },
       },
     },
   });
 
-  return NextResponse.json({ shopId: DEMO_SHOP_ID, start, end, bookings });
+  return NextResponse.json({ businessId: business.id, start, end, bookings });
 }

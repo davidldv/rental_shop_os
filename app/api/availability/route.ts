@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getRemainingQuantityForItem, isValidRange } from "@/lib/availability";
-
-const DEMO_SHOP_ID = "demo-shop";
+import { getRemainingQuantityForProduct, isValidRange } from "@/lib/availability";
+import { prisma } from "@/lib/db";
+import { verifySession } from "@/lib/session";
 
 const QuerySchema = z.object({
-  itemId: z.string().min(1),
+  productId: z.string().min(1),
   startAt: z.string().datetime(),
   endAt: z.string().datetime(),
   quantity: z.coerce.number().int().positive().optional(),
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   let parsed: z.infer<typeof QuerySchema>;
   try {
     parsed = QuerySchema.parse({
-      itemId: url.searchParams.get("itemId"),
+      productId: url.searchParams.get("productId"),
       startAt: url.searchParams.get("startAt"),
       endAt: url.searchParams.get("endAt"),
       quantity: url.searchParams.get("quantity") ?? undefined,
@@ -29,27 +29,26 @@ export async function GET(req: Request) {
 
   const startAt = new Date(parsed.startAt);
   const endAt = new Date(parsed.endAt);
-  const quantity = parsed.quantity ?? 1;
 
   if (!isValidRange(startAt, endAt)) {
     return NextResponse.json({ error: "Invalid date range" }, { status: 400 });
   }
 
-  const remaining = await getRemainingQuantityForItem({
-    shopId: DEMO_SHOP_ID,
-    itemId: parsed.itemId,
-    startAt,
-    endAt,
-    quantity,
-  });
+  const session = await verifySession();
+  const business = await prisma.business.findUnique({ where: { userId: session.userId } });
+  if (!business) return NextResponse.json({ error: "No business" }, { status: 500 });
 
-  return NextResponse.json({
-    shopId: DEMO_SHOP_ID,
-    itemId: parsed.itemId,
-    startAt,
-    endAt,
-    requestedQuantity: quantity,
-    ...remaining,
-    available: remaining.exists ? remaining.remaining >= quantity : false,
-  });
+  try {
+    const remaining = await getRemainingQuantityForProduct({
+      businessId: business.id,
+      productId: parsed.productId,
+      startAt,
+      endAt,
+      quantity: parsed.quantity ?? 1,
+    });
+
+    return NextResponse.json(remaining);
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+  }
 }
